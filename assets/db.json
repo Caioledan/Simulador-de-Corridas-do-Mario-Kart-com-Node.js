@@ -1,0 +1,31 @@
+{
+  "characters": [
+    {
+      "ID": 1,
+      "NAME": "Rogue 🗡️",
+      "AGILITY": 5,
+      "MAGIC": 2,
+      "STRENGHT": 3,
+      "POWER": 3,
+      "SCORE": 0
+    },
+    {
+      "ID": 1,
+      "NAME": "Warrior ⚔️",
+      "AGILITY": 2,
+      "MAGIC": 1,
+      "STRENGHT": 5,
+      "POWER": 2,
+      "SCORE": 0
+    },
+    {
+      "ID": 1,
+      "NAME": "Mage 🧙",
+      "AGILITY": 3,
+      "MAGIC": 5,
+      "STRENGHT": 3,
+      "POWER": 4,
+      "SCORE": 0
+    }
+  ]
+}

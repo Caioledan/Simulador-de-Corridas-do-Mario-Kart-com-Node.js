@@ -1,20 +1,6 @@
-const player1 = {
-    NAME: "Mario",
-    SPEED: 3,
-    MANEUVERABILITY: 4,
-    POWER: 3,
-    STYLE: 4,
-    SCORE: 0,
-};
-
-const player2 = {
-    NAME: "Bowser",
-    SPEED: 5,
-    MANEUVERABILITY: 2,
-    POWER: 5,
-    STYLE: 1,
-    SCORE: 0,
-};
+const fs = require('fs/promises');
+const { resolve } = require('path');
+const readline = require('readline')
 
 // function to roll the dices
 async function rollDice() {
@@ -28,19 +14,19 @@ async function getRandomBlock() {
 
     switch (true) {
         case random < 0.25:
-            result = "STRAIGHT";
+            result = "MEELEE";
             break;
         
         case random >= 0.25 && random < 0.5:
-            result = "CURVE";
+            result = "RANGED";
             break;
         
         case random >= 0.5 && random < 0.75:
-            result = "CONFRONTATION";
+            result = "MAGIC";
             break
         
         case random >= 0.75:
-            result = "RAMP";
+            result = "CONFRONTATION";
             break;
     }
 
@@ -70,12 +56,12 @@ async function rollResult(charName, block, diceResult, attribute) {
 }
 
 // function for the race
-async function raceEngine(char1, char2) {
+async function fightEngine(char1, char2) {
     for (let round = 1; round <= 5; round++){
-        console.log(`🏁 Round ${round}`);
+        console.log(`⚔️ Round ${round} ⚔️`);
 
         let block = await getRandomBlock();
-        console.log(`Block: ${block}`)
+        console.log(`🏅 Challenge: ${block} 🏅`)
 
         let diceResult1 = await rollDice();
         let diceResult2 = await rollDice();
@@ -83,30 +69,30 @@ async function raceEngine(char1, char2) {
         let testSkill1 = 0;
         let testSkill2 = 0;
 
-        if (block === "STRAIGHT"){
-            testSkill1 = diceResult1 + char1.SPEED;
-            testSkill2 = diceResult2 + char2.SPEED;
+        if (block === "MEELEE"){
+            testSkill1 = diceResult1 + char1.STRENGHT;
+            testSkill2 = diceResult2 + char2.STRENGHT;
 
-            let result1 = await rollResult(char1.NAME, "STRAIGHT", diceResult1, char1.SPEED)
-            let result2 = await rollResult(char2.NAME, "STRAIGHT", diceResult2, char2.SPEED)
-
-            await roundWinner(result1, result2, char1, char2)
-        }
-        else if (block === "CURVE"){
-            testSkill1 = diceResult1 + char1.MANEUVERABILITY;
-            testSkill2 = diceResult2 + char2.MANEUVERABILITY;
-
-            let result1 = await rollResult(char1.NAME, "CURVE", diceResult1, char1.MANEUVERABILITY)
-            let result2 = await rollResult(char2.NAME, "CURVE", diceResult2, char2.MANEUVERABILITY)
+            let result1 = await rollResult(char1.NAME, "MEELEE", diceResult1, char1.STRENGHT)
+            let result2 = await rollResult(char2.NAME, "MEELEE", diceResult2, char2.STRENGHT)
 
             await roundWinner(result1, result2, char1, char2)
         }
-        else if (block === "RAMP"){
-            testSkill1 = diceResult1 + char1.STYLE;
-            testSkill2 = diceResult2 + char2.STYLE;
+        else if (block === "RANGED"){
+            testSkill1 = diceResult1 + char1.AGILITY;
+            testSkill2 = diceResult2 + char2.AGILITY;
 
-            let result1 = await rollResult(char1.NAME, "RAMP", diceResult1, char1.STYLE)
-            let result2 = await rollResult(char2.NAME, "RAMP", diceResult2, char2.STYLE)
+            let result1 = await rollResult(char1.NAME, "RANGED", diceResult1, char1.AGILITY)
+            let result2 = await rollResult(char2.NAME, "RANGED", diceResult2, char2.AGILITY)
+
+            await roundWinner(result1, result2, char1, char2)
+        }
+        else if (block === "MAGIC"){
+            testSkill1 = diceResult1 + char1.MAGIC;
+            testSkill2 = diceResult2 + char2.MAGIC;
+
+            let result1 = await rollResult(char1.NAME, "MAGIC", diceResult1, char1.MAGIC)
+            let result2 = await rollResult(char2.NAME, "MAGIC", diceResult2, char2.MAGIC)
 
             await roundWinner(result1, result2, char1, char2)
         }
@@ -147,25 +133,49 @@ async function raceEngine(char1, char2) {
 
 // Function to declare the winner player
 async function declareWinner(char1, char2) {
-    console.log(`Final result:\n${char1.NAME} scored ${char1.SCORE}\n${char2.NAME} scored ${char2.SCORE}`)
+    console.log(`🏆 Final result:\n${char1.NAME} scored ${char1.SCORE}\n${char2.NAME} scored ${char2.SCORE}`)
 
     if (char1.SCORE > char2.SCORE){
-        console.log(`${char1.NAME} won the race!`)
+        console.log(`⚔️ ${char1.NAME} won the fight! ⚔️`)
     }
     else if (char1.SCORE < char2.SCORE){
-        console.log(`${char2.NAME} won the race!`) 
+        console.log(`⚔️ ${char2.NAME} won the fight! ⚔️`) 
     }
     else {
-        console.log(`The race was a draw`)
+        console.log(`⚔️ The fight was a draw ⚔️`)
     }
 }
 
+// Function to choose wich class you wanna play
+async function charChoose() {
+    
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    })
+    
+    return new Promise((resolve) => {
+        rl.question("Choose a class:\n1. Rogue 🗡️\n2. Warrior ⚔️\n3. Mage 🧙\nType the number of the class: ", (answer) => {
+            rl.close();
+            resolve(answer);
+        })
+    });
+}
 
 // Auto invoke main function
 (async function main() {
-    console.log(`🏁 Race between ${player1.NAME} and ${player2.NAME} starting!`);
+    const arquivo = await fs.readFile('assets/db.json')
+    const db = JSON.parse(arquivo)
+
+    const p1 = await charChoose()
+    const p2 = await charChoose()
+
+    const player1 = db.characters[parseInt(p1)-1];
+    const player2 = db.characters[parseInt(p2)-1];
+
+    console.log(`⚔️ Fight between ${player1.NAME} and ${player2.NAME} starting! ⚔️`);
     console.log("--------------------------------------");
 
-    await raceEngine(player1, player2);
+    await fightEngine(player1, player2);
 })()
 
